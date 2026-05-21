@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2f921a5c1a0ac24ba9376f52bcc6254, type: 3}
+  m_Name: MoodConfig
+  m_EditorClassIdentifier: Assembly-CSharp::Booth.Mood.MoodConfig
+  MaxMood: 100
+  IdleGracePeriod: 5
+  IdleDrainPerSecond: 3
+  PenaltyAcceptMinor: 25
+  PenaltyAcceptFake: 20
+  PenaltyAcceptInsufficient: 15
+  PenaltyRejectValid: 20
+  PenaltyAskUnnecessary: 8
+  PenaltyDefault: 10

@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 664b66f7d1cbd7947bea5aeede6bc4c7, type: 3}
+  m_Name: CustomerConfig
+  m_EditorClassIdentifier: Assembly-CSharp::Booth.Customers.CustomerConfig
+  TicketPrice: 4
+  MoneyRangesByTier:
+  - Min: 4
+    Max: 8
+  - Min: 2
+    Max: 6
+  - Min: 1
+    Max: 5.5
+  - Min: 0.5
+    Max: 5
+  MinorChanceByTier:
+  - 0.1
+  - 0.15
+  - 0.2
+  - 0.25
+  FakeBillChanceByTier:
+  - 0.05
+  - 0.12
+  - 0.2
+  - 0.28
+  CanPayMoreChance: 0.5
+  ExtraMoneyRange:
+    Min: 0.5
+    Max: 3
+  SpawnDelayByTier:
+  - 0.8
+  - 0.6
+  - 0.4
+  - 0.25
+  CustomerSpriteKeys:
+  - customer_adult_a
+  - customer_adult_b
+  - customer_adult_c
+  - customer_adult_d
+  - customer_minor_a
+  - customer_minor_b
+  MinorSpriteKeys:
+  - customer_minor_a
+  - customer_minor_b
