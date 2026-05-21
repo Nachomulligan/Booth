@@ -881,7 +881,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &350862173
 RectTransform:
   m_ObjectHideFlags: 0
@@ -922,6 +922,8 @@ MonoBehaviour:
   _customersServedText: {fileID: 1049007789}
   _errorsMadeText: {fileID: 2134561195}
   _flavorText: {fileID: 865100365}
+  _victoryHeadline: THE SHOW BEGINS
+  _defeatHeadline: CHAOS
   _victoryFlavors:
   - The theater erupts. The screen lights up.
   - "The event begins. You were there \u2014 and no one will remember that."
@@ -2074,7 +2076,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1061472438
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2091,6 +2093,8 @@ MonoBehaviour:
   _customersServedText: {fileID: 272239000}
   _errorsMadeText: {fileID: 650646359}
   _flavorText: {fileID: 407774397}
+  _victoryHeadline: THE SHOW BEGINS
+  _defeatHeadline: CHAOS
   _victoryFlavors:
   - The theater erupts. The screen lights up.
   - "The event begins. You were there \u2014 and no one will remember that."

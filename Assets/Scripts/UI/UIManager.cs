@@ -49,14 +49,14 @@ namespace Booth.UI
         {
             HideAll();
             _victoryScreen.SetActive(true);
-            _victoryScreenUI?.Show();
+            _victoryScreenUI?.Show(isVictory: true);
         }
 
         public void ShowDefeatScreen()
         {
             HideAll();
             _defeatScreen.SetActive(true);
-            _defeatScreenUI?.Show();
+            _defeatScreenUI?.Show(isVictory: false);
         }
 
         public void HideEndScreen()

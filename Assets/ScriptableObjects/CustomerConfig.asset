@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Booth.Customers.CustomerConfig
   TicketPrice: 4
   MoneyRangesByTier:
-  - Min: 4
+  - Min: 3
     Max: 8
   - Min: 2
     Max: 6
@@ -23,15 +23,15 @@ MonoBehaviour:
   - Min: 0.5
     Max: 5
   MinorChanceByTier:
-  - 0.1
-  - 0.15
+  - 0.3
+  - 0.4
+  - 0.5
+  - 0.6
+  FakeBillChanceByTier:
   - 0.2
   - 0.25
-  FakeBillChanceByTier:
-  - 0.05
-  - 0.12
-  - 0.2
-  - 0.28
+  - 0.3
+  - 0.35
   CanPayMoreChance: 0.5
   ExtraMoneyRange:
     Min: 0.5
