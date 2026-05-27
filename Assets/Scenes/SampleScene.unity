@@ -881,7 +881,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &350862173
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2214,7 +2214,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1061472438
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4233,12 +4233,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Booth.Customers.CustomerPresenter
   _customerSprite: {fileID: 1391731795}
   _customerAnimator: {fileID: 0}
-  _moneyText: {fileID: 1465756907}
   _billsContainer: {fileID: 1121370598}
-  _fakeBillIndicator: {fileID: 1349525227}
+  _moneySlotPrefab: {fileID: 0}
+  _moneyVisualConfig: {fileID: 0}
   _visualConfig: {fileID: 11400000, guid: 863f1601715ecb244a6437ef420ec9d1, type: 2}
+  _slotSpacing: 70
+  _coinRowOffsetY: -60
   _slideDuration: 0.3
   _departDuration: 0.25
+  _slotAppearDelay: 0.06
 --- !u!4 &1866636323
 Transform:
   m_ObjectHideFlags: 0
@@ -4894,6 +4897,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Booth.Customers.CustomerManager
   _config: {fileID: 11400000, guid: 300ba42aaeb8ae741af48ee297f3ef6e, type: 2}
+  _moneyConfig: {fileID: 0}
   _presenter: {fileID: 1866636322}
 --- !u!1 &2122491543
 GameObject:

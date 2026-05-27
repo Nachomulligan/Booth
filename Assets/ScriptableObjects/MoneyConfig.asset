@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2cf2fe71ec815e84986b20dbf76d9bce, type: 3}
+  m_Name: MoneyConfig
+  m_EditorClassIdentifier: Assembly-CSharp::Booth.Customers.MoneyConfig
+  Denominations:
+  - Value: 5
+    Kind: 0
+    SpriteKey: bill_5
+    FakeSpriteKey: bill_5_fake
+    CanBeFake: 1
+  - Value: 1
+    Kind: 0
+    SpriteKey: bill_1
+    FakeSpriteKey: bill_1_fake
+    CanBeFake: 1
+  - Value: 0.5
+    Kind: 1
+    SpriteKey: coin_50
+    FakeSpriteKey: 
+    CanBeFake: 0
+  - Value: 0.25
+    Kind: 1
+    SpriteKey: coin_25
+    FakeSpriteKey: 
+    CanBeFake: 0
+  - Value: 0.1
+    Kind: 1
+    SpriteKey: coin_10
+    FakeSpriteKey: 
+    CanBeFake: 0
+  CoinChanceByTier:
+  - 0
+  - 0.2
+  - 0.5
+  - 0.8
+  FakeBillChance: 0.3
+  AllowFakeMixedWithReal: 1
+  MaxDisplayPieces: 8

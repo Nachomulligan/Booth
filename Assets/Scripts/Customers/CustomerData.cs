@@ -1,60 +1,54 @@
 // ============================================================
 // CustomerData.cs
 // Pure data model representing one customer's attributes.
-// No MonoBehaviour, no Unity deps — just a clean data class.
-// Instantiated by CustomerFactory, read by DecisionSystem.
+// Ahora incluye PhysicalMoney: lista de billetes/monedas reales
+// que el jugador debe contar visualmente.
 // ============================================================
 
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Booth.Customers
 {
-    /// <summary>
-    /// All information the player must evaluate for one customer.
-    /// Immutable after creation — created by CustomerFactory.
-    /// </summary>
     [System.Serializable]
     public class CustomerData
     {
         // ── Identity ─────────────────────────────────────────
-        /// <summary>Unique ID for this customer instance (for logging/stats).</summary>
-        public int Id { get; private set; }
-
-        /// <summary>Visual sprite key — maps to a sprite in CustomerVisualConfig.</summary>
+        public int    Id        { get; private set; }
         public string SpriteKey { get; private set; }
 
         // ── Evaluation conditions ─────────────────────────────
-        /// <summary>Amount of money the customer presents (in dollars).</summary>
-        public float MoneyPresented { get; private set; }
-
-        /// <summary>True if this customer is a minor. Minors must always be rejected.</summary>
-        public bool IsMinor { get; private set; }
-
-        /// <summary>True if the bills presented are counterfeit. Fakes must always be rejected.</summary>
-        public bool HasFakeBills { get; private set; }
-
-        /// <summary>True if the customer has extra money to give when asked.</summary>
-        public bool CanPayMore { get; private set; }
-
-        /// <summary>Extra money available if asked (only matters when CanPayMore is true).</summary>
+        /// <summary>Total numérico — fuente de verdad para DecisionSystem.
+        /// Las piezas físicas son presentación; este valor es la lógica.</summary>
+        public float MoneyPresented      { get; private set; }
+        public bool  IsMinor             { get; private set; }
+        public bool  HasFakeBills        { get; private set; }
+        public bool  CanPayMore          { get; private set; }
         public float ExtraMoneyAvailable { get; private set; }
 
-        // ── Derived ───────────────────────────────────────────
+        // ── Dinero físico ─────────────────────────────────────
         /// <summary>
-        /// True if this customer is completely valid and should be ACCEPTED.
-        /// A valid customer: not a minor, no fake bills, sufficient money.
+        /// Billetes y monedas individuales que el cliente pone en la mesa.
+        /// El jugador los cuenta para determinar el total.
+        /// Generados por MoneyComposer en CustomerFactory.
         /// </summary>
+        public List<DenominationInstance> PhysicalMoney      { get; private set; }
+
+        /// <summary>Piezas extra que se revelan al pedir más. Null hasta que se pide.</summary>
+        public List<DenominationInstance> ExtraPhysicalMoney { get; private set; }
+
+        // ── Derived ───────────────────────────────────────────
         public bool IsValid(float ticketPrice)
         {
-            if (IsMinor)       return false;
-            if (HasFakeBills)  return false;
+            if (IsMinor)      return false;
+            if (HasFakeBills) return false;
             return TotalPossibleMoney >= ticketPrice;
         }
 
-        /// <summary>Max money this customer can ever provide.</summary>
-        public float TotalPossibleMoney => MoneyPresented + (CanPayMore ? ExtraMoneyAvailable : 0f);
+        public float TotalPossibleMoney =>
+            MoneyPresented + (CanPayMore ? ExtraMoneyAvailable : 0f);
 
-        // ── Factory constructor (use CustomerFactory, not this directly) ──
+        // ── Factory constructor ───────────────────────────────
         private CustomerData() { }
 
         public static CustomerData Create(
@@ -64,7 +58,9 @@ namespace Booth.Customers
             bool   isMinor,
             bool   hasFakeBills,
             bool   canPayMore,
-            float  extraMoney)
+            float  extraMoney,
+            List<DenominationInstance> physicalMoney,
+            List<DenominationInstance> extraPhysicalMoney)
         {
             return new CustomerData
             {
@@ -74,35 +70,32 @@ namespace Booth.Customers
                 IsMinor              = isMinor,
                 HasFakeBills         = hasFakeBills,
                 CanPayMore           = canPayMore,
-                ExtraMoneyAvailable  = extraMoney
+                ExtraMoneyAvailable  = extraMoney,
+                PhysicalMoney        = physicalMoney      ?? new List<DenominationInstance>(),
+                ExtraPhysicalMoney   = extraPhysicalMoney ?? new List<DenominationInstance>()
             };
         }
 
         public override string ToString() =>
             $"Customer[{Id}] sprite:{SpriteKey} money:{MoneyPresented} " +
-            $"minor:{IsMinor} fake:{HasFakeBills} canMore:{CanPayMore}";
+            $"pieces:{PhysicalMoney?.Count ?? 0} minor:{IsMinor} fake:{HasFakeBills} canMore:{CanPayMore}";
     }
 
     // ============================================================
-    // DecisionResult — result of evaluating a decision
+    // DecisionResult
     // ============================================================
-    /// <summary>
-    /// Outcome after the player makes a decision on a customer.
-    /// Passed through events so multiple systems can react.
-    /// </summary>
     [System.Serializable]
     public class DecisionResult
     {
-        public CustomerData  Customer    { get; set; }
-        public DecisionType  Decision    { get; set; }
-        public bool          IsCorrect   { get; set; }
-        public string        ReasonCode  { get; set; } // e.g. "accepted_minor", "correct_reject"
+        public CustomerData Customer   { get; set; }
+        public DecisionType Decision   { get; set; }
+        public bool         IsCorrect  { get; set; }
+        public string       ReasonCode { get; set; }
 
         public override string ToString() =>
             $"Decision:{Decision} Correct:{IsCorrect} Reason:{ReasonCode}";
     }
 
-    /// <summary>The three actions the player can take.</summary>
     public enum DecisionType
     {
         Accept,

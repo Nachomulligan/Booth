@@ -1,59 +1,48 @@
 // ============================================================
 // CustomerFactory.cs
-// Generates CustomerData instances based on difficulty tier.
-// Pure factory — no MonoBehaviour, no scene deps.
-// CustomerManager owns and calls this.
+// Genera CustomerData completos, ahora incluyendo dinero físico
+// mediante MoneyComposer.
 // ============================================================
 
+using System.Collections.Generic;
 using UnityEngine;
 using Booth.Customers;
 
 namespace Booth.Customers
 {
-    /// <summary>
-    /// Generates CustomerData instances. Separated from
-    /// CustomerManager so generation logic can be tested/swapped.
-    /// </summary>
     public class CustomerFactory
     {
         private readonly CustomerConfig _config;
+        private readonly MoneyComposer  _composer;
         private int _nextId = 0;
 
-        public CustomerFactory(CustomerConfig config)
+        public CustomerFactory(CustomerConfig config, MoneyComposer composer)
         {
-            _config = config;
+            _config   = config;
+            _composer = composer;
         }
 
-        /// <summary>
-        /// Generates a new customer appropriate for the given difficulty tier.
-        /// </summary>
-        /// <param name="difficultyTier">0=easy ... 3=hard</param>
         public CustomerData Generate(int difficultyTier)
         {
             int tier = Mathf.Clamp(difficultyTier, 0, 3);
 
-            // ── Determine if minor ────────────────────────────
-            bool isMinor = Random.value < _config.MinorChanceByTier[tier];
+            // ── Identidad ─────────────────────────────────────
+            bool   isMinor    = Random.value < _config.MinorChanceByTier[tier];
+            string spriteKey  = ChooseSpriteKey(isMinor);
 
-            // ── Choose sprite ─────────────────────────────────
-            string spriteKey = ChooseSpriteKey(isMinor);
-
-            // ── Determine fake bills ──────────────────────────
-            // Minors can also have fake bills, but it doesn't matter —
-            // they get rejected anyway. Still track it for stats.
+            // ── Billetes falsos ───────────────────────────────
             bool hasFakeBills = Random.value < _config.FakeBillChanceByTier[tier];
 
-            // ── Determine money ───────────────────────────────
+            // ── Monto total ───────────────────────────────────
             float money = _config.MoneyRangesByTier[tier].Random();
-            // Round to nearest 25 cents for readability
-            money = Mathf.Round(money * 4f) / 4f;
+            // No redondeamos acá — MoneyComposer lo hace según si hay monedas
 
-            // ── Determine if they can pay more ────────────────
-            bool canPayMore    = false;
-            float extraMoney   = 0f;
-            bool isShortOnMoney = money < _config.TicketPrice;
+            // ── Puede dar más ─────────────────────────────────
+            bool  canPayMore  = false;
+            float extraMoney  = 0f;
+            bool  isShort     = money < _config.TicketPrice;
 
-            if (isShortOnMoney && !isMinor && !hasFakeBills)
+            if (isShort && !isMinor && !hasFakeBills)
             {
                 canPayMore = Random.value < _config.CanPayMoreChance;
                 if (canPayMore)
@@ -63,37 +52,62 @@ namespace Booth.Customers
                 }
             }
 
+            // ── Dinero físico ─────────────────────────────────
+            // MoneyComposer convierte el float en billetes/monedas concretos.
+            // HasFakeBills le dice si debe inyectar un billete falso.
+            List<DenominationInstance> physical = _composer.Compose(
+                amount:       money,
+                hasFakeBills: hasFakeBills,
+                tier:         tier);
+
+            // El monto real es la suma de las piezas generadas
+            // (puede diferir levemente del float original por redondeo de monedas)
+            float actualMoney = SumPieces(physical);
+
+            // Extra money también como piezas físicas
+            List<DenominationInstance> extraPhysical = null;
+            if (canPayMore && extraMoney > 0f)
+            {
+                extraPhysical = _composer.Compose(
+                    amount:       extraMoney,
+                    hasFakeBills: false,   // el extra nunca es falso
+                    tier:         tier);
+                extraMoney = SumPieces(extraPhysical);
+            }
+
             return CustomerData.Create(
-                id:             _nextId++,
-                spriteKey:      spriteKey,
-                moneyPresented: money,
-                isMinor:        isMinor,
-                hasFakeBills:   hasFakeBills,
-                canPayMore:     canPayMore,
-                extraMoney:     extraMoney
-            );
+                id:                 _nextId++,
+                spriteKey:          spriteKey,
+                moneyPresented:     actualMoney,
+                isMinor:            isMinor,
+                hasFakeBills:       hasFakeBills,
+                canPayMore:         canPayMore,
+                extraMoney:         extraMoney,
+                physicalMoney:      physical,
+                extraPhysicalMoney: extraPhysical);
         }
 
-        // ── Private helpers ───────────────────────────────────
+        // ── Helpers ───────────────────────────────────────────
+
+        private float SumPieces(List<DenominationInstance> pieces)
+        {
+            if (pieces == null) return 0f;
+            float total = 0f;
+            foreach (var p in pieces) total += p.Value;
+            // Redondear para evitar floating point drift
+            return Mathf.Round(total * 100f) / 100f;
+        }
 
         private string ChooseSpriteKey(bool isMinor)
         {
             if (isMinor && _config.MinorSpriteKeys.Length > 0)
-            {
-                // Pick a random minor sprite
-                return _config.MinorSpriteKeys[
-                    Random.Range(0, _config.MinorSpriteKeys.Length)];
-            }
+                return _config.MinorSpriteKeys[Random.Range(0, _config.MinorSpriteKeys.Length)];
 
-            // Pick a random adult sprite (exclude minor keys)
-            // Collect adult keys
             var adultKeys = System.Array.FindAll(
                 _config.CustomerSpriteKeys,
                 k => System.Array.IndexOf(_config.MinorSpriteKeys, k) < 0);
 
-            if (adultKeys.Length == 0)
-                return _config.CustomerSpriteKeys[0]; // fallback
-
+            if (adultKeys.Length == 0) return _config.CustomerSpriteKeys[0];
             return adultKeys[Random.Range(0, adultKeys.Length)];
         }
     }

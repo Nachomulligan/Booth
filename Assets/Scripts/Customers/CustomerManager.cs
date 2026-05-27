@@ -18,6 +18,7 @@ namespace Booth.Customers
         // ── Inspector ─────────────────────────────────────────
         [Header("Config")]
         [SerializeField] private CustomerConfig _config;
+        [SerializeField] private MoneyConfig    _moneyConfig;
 
         [Header("Scene References")]
         [Tooltip("The presenter handles the visual display of the customer.")]
@@ -33,7 +34,8 @@ namespace Booth.Customers
         // ── Unity lifecycle ───────────────────────────────────
         private void Awake()
         {
-            _factory = new CustomerFactory(_config);
+            var composer = new MoneyComposer(_moneyConfig);
+            _factory = new CustomerFactory(_config, composer);
         }
 
         private void OnEnable()
