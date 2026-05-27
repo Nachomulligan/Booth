@@ -13,12 +13,12 @@ namespace Booth.Customers
     public class CustomerFactory
     {
         private readonly CustomerConfig _config;
-        private readonly MoneyComposer  _composer;
+        private readonly MoneyComposer _composer;
         private int _nextId = 0;
 
         public CustomerFactory(CustomerConfig config, MoneyComposer composer)
         {
-            _config   = config;
+            _config = config;
             _composer = composer;
         }
 
@@ -27,8 +27,8 @@ namespace Booth.Customers
             int tier = Mathf.Clamp(difficultyTier, 0, 3);
 
             // ── Identidad ─────────────────────────────────────
-            bool   isMinor    = Random.value < _config.MinorChanceByTier[tier];
-            string spriteKey  = ChooseSpriteKey(isMinor);
+            bool isMinor = Random.value < _config.MinorChanceByTier[tier];
+            string spriteKey = ChooseSpriteKey(isMinor);
 
             // ── Billetes falsos ───────────────────────────────
             bool hasFakeBills = Random.value < _config.FakeBillChanceByTier[tier];
@@ -38,11 +38,16 @@ namespace Booth.Customers
             // No redondeamos acá — MoneyComposer lo hace según si hay monedas
 
             // ── Puede dar más ─────────────────────────────────
-            bool  canPayMore  = false;
-            float extraMoney  = 0f;
-            bool  isShort     = money < _config.TicketPrice;
+            // Menores y de billetes falsos TAMBIÉN pueden tener más dinero.
+            // El jugador tiene que detectar el problema por su cuenta —
+            // el sistema no lo protege cortando CanPayMore.
+            // Si le pedís más a un menor y da: igual se rechaza.
+            // Si le pedís más a alguien con fake: el extra también puede ser fake.
+            bool canPayMore = false;
+            float extraMoney = 0f;
+            bool isShort = money < _config.TicketPrice;
 
-            if (isShort && !isMinor && !hasFakeBills)
+            if (isShort)
             {
                 canPayMore = Random.value < _config.CanPayMoreChance;
                 if (canPayMore)
@@ -56,9 +61,9 @@ namespace Booth.Customers
             // MoneyComposer convierte el float en billetes/monedas concretos.
             // HasFakeBills le dice si debe inyectar un billete falso.
             List<DenominationInstance> physical = _composer.Compose(
-                amount:       money,
+                amount: money,
                 hasFakeBills: hasFakeBills,
-                tier:         tier);
+                tier: tier);
 
             // El monto real es la suma de las piezas generadas
             // (puede diferir levemente del float original por redondeo de monedas)
@@ -69,21 +74,21 @@ namespace Booth.Customers
             if (canPayMore && extraMoney > 0f)
             {
                 extraPhysical = _composer.Compose(
-                    amount:       extraMoney,
+                    amount: extraMoney,
                     hasFakeBills: false,   // el extra nunca es falso
-                    tier:         tier);
+                    tier: tier);
                 extraMoney = SumPieces(extraPhysical);
             }
 
             return CustomerData.Create(
-                id:                 _nextId++,
-                spriteKey:          spriteKey,
-                moneyPresented:     actualMoney,
-                isMinor:            isMinor,
-                hasFakeBills:       hasFakeBills,
-                canPayMore:         canPayMore,
-                extraMoney:         extraMoney,
-                physicalMoney:      physical,
+                id: _nextId++,
+                spriteKey: spriteKey,
+                moneyPresented: actualMoney,
+                isMinor: isMinor,
+                hasFakeBills: hasFakeBills,
+                canPayMore: canPayMore,
+                extraMoney: extraMoney,
+                physicalMoney: physical,
                 extraPhysicalMoney: extraPhysical);
         }
 

@@ -18,20 +18,20 @@ namespace Booth.Decisions
         // ── Inspector ─────────────────────────────────────────
         [Header("Dependencies")]
         [SerializeField] private CustomerManager _customerManager;
-        [SerializeField] private CustomerConfig  _config;
+        [SerializeField] private CustomerConfig _config;
 
         // ── Unity lifecycle ───────────────────────────────────
         private void OnEnable()
         {
-            GameEvents.OnDecisionAccept  += HandleAccept;
-            GameEvents.OnDecisionReject  += HandleReject;
+            GameEvents.OnDecisionAccept += HandleAccept;
+            GameEvents.OnDecisionReject += HandleReject;
             GameEvents.OnDecisionAskMore += HandleAskMore;
         }
 
         private void OnDisable()
         {
-            GameEvents.OnDecisionAccept  -= HandleAccept;
-            GameEvents.OnDecisionReject  -= HandleReject;
+            GameEvents.OnDecisionAccept -= HandleAccept;
+            GameEvents.OnDecisionReject -= HandleReject;
             GameEvents.OnDecisionAskMore -= HandleAskMore;
         }
 
@@ -148,18 +148,24 @@ namespace Booth.Decisions
         /// </summary>
         private DecisionResult EvaluateAskMore(CustomerData c)
         {
-            // If money is already sufficient, asking for more is wrong
+            // Si es menor o tiene billetes falsos, pedir más es neutral — sin penalidad.
+            // El jugador todavía no detectó el problema real, y castigarlo por pedir
+            // más plata antes de rechazar sería injusto. El error real viene al Aceptar.
+            if (c.IsMinor || c.HasFakeBills)
+                return Correct(c, DecisionType.AskForMore, "ask_more_on_invalid_neutral");
+
+            // Si ya tiene suficiente dinero y le pedís más → penalidad
             if (c.MoneyPresented >= _config.TicketPrice)
                 return Wrong(c, DecisionType.AskForMore, "asked_more_unnecessary");
 
-            // Correct to ask when money is short
+            // Correcto pedir más cuando la plata no alcanza
             return Correct(c, DecisionType.AskForMore, "correct_ask_more");
         }
 
         // ── Helpers ───────────────────────────────────────────
 
         private DecisionResult Correct(CustomerData c, DecisionType type, string reason) =>
-            new DecisionResult { Customer = c, Decision = type, IsCorrect = true,  ReasonCode = reason };
+            new DecisionResult { Customer = c, Decision = type, IsCorrect = true, ReasonCode = reason };
 
         private DecisionResult Wrong(CustomerData c, DecisionType type, string reason) =>
             new DecisionResult { Customer = c, Decision = type, IsCorrect = false, ReasonCode = reason };
