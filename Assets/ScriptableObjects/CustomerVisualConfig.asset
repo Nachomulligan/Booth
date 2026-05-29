@@ -14,14 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Booth.Customers.CustomerVisualConfig
   Entries:
   - Key: customer_adult_a
-    Sprite: {fileID: -3558552238673493281, guid: aace8480253fdb448a91a67fb2702032, type: 3}
+    Sprite: {fileID: -3558552238673493281, guid: c29fb0dcbc886ab42a727b9c542e37a2, type: 3}
   - Key: customer_adult_b
-    Sprite: {fileID: 2575966596581722498, guid: 19beb402de95f0144b6c43755b57e189, type: 3}
-  - Key: customer_adult_c
-    Sprite: {fileID: -5198404524020431775, guid: 225c2cbfbde868c479ac240fefe3267a, type: 3}
-  - Key: customer_adult_d
-    Sprite: {fileID: 283988907511131584, guid: 419d9bdaf722b9d4fb557df26b525ed3, type: 3}
+    Sprite: {fileID: -5198404524020431775, guid: 20fe6a23805064f42a7edae5c6bbdb29, type: 3}
   - Key: customer_minor_a
-    Sprite: {fileID: 2645832069189482471, guid: c1d3941e53dc9064ba188ac97b865a3f, type: 3}
-  - Key: customer_minor_b
-    Sprite: {fileID: -8973122142573434898, guid: d1c3a3fb457bed448a08c7be8a222f9d, type: 3}
+    Sprite: {fileID: 2575966596581722498, guid: 0c672ed2601718148b5a8fe85a7730cb, type: 3}
