@@ -1,10 +1,9 @@
 // ============================================================
 // AudioManager.cs
-// Handles all audio feedback. Listens to OnAudioCueRequested
-// and plays the appropriate clip. No other system touches audio.
-//
-// Ambient crowd sound evolves with mood — this reinforces the
-// GDD's "diegetic only" design: the crowd IS the soundtrack.
+// Versión adaptada para un solo ambient clip.
+// Si solo hay un clip en el array, lo usa siempre sin cambiar.
+// Cuando haya más clips, el sistema de mood switching funciona
+// automáticamente sin tocar nada.
 // ============================================================
 
 using System.Collections.Generic;
@@ -15,7 +14,6 @@ namespace Booth.Audio
 {
     public class AudioManager : MonoBehaviour
     {
-        // ── Inspector ─────────────────────────────────────────
         [Header("Audio Sources")]
         [SerializeField] private AudioSource _sfxSource;
         [SerializeField] private AudioSource _ambientSource;
@@ -32,20 +30,17 @@ namespace Booth.Audio
         [SerializeField] private AudioClip _buttonClickClip;
 
         [Header("Ambient Clips (by mood level)")]
-        [Tooltip("Ambient crowd tracks for different mood ranges. " +
-                 "Index 0=low mood (tense), Index 1=mid, Index 2=high mood (excited)")]
+        [Tooltip("Con 1 clip: se usa siempre. Con 3 clips: cambia según mood (0=bajo, 1=medio, 2=alto).")]
         [SerializeField] private AudioClip[] _ambientByMood;
 
         [Header("Ambient Settings")]
         [SerializeField] private float _ambientFadeSpeed = 2f;
-        [SerializeField] [Range(0f, 1f)] private float _ambientVolume = 0.4f;
+        [SerializeField][Range(0f, 1f)] private float _ambientVolume = 0.4f;
 
-        // ── State ─────────────────────────────────────────────
         private Dictionary<string, AudioClip> _clipMap;
         private float _targetAmbientVolume;
-        private int   _currentAmbientIndex = -1;
+        private int _currentAmbientIndex = -1;
 
-        // ── Unity lifecycle ───────────────────────────────────
         private void Awake()
         {
             BuildClipMap();
@@ -55,70 +50,68 @@ namespace Booth.Audio
         private void OnEnable()
         {
             GameEvents.OnAudioCueRequested += HandleAudioCue;
-            GameEvents.OnMoodChanged       += HandleMoodChanged;
+            GameEvents.OnMoodChanged += HandleMoodChanged;
         }
 
         private void OnDisable()
         {
             GameEvents.OnAudioCueRequested -= HandleAudioCue;
-            GameEvents.OnMoodChanged       -= HandleMoodChanged;
+            GameEvents.OnMoodChanged -= HandleMoodChanged;
         }
 
         private void Update()
         {
-            // Smooth ambient volume transitions
             if (_ambientSource != null)
                 _ambientSource.volume = Mathf.MoveTowards(
                     _ambientSource.volume, _targetAmbientVolume,
                     Time.deltaTime * _ambientFadeSpeed);
         }
 
-        // ── Event handlers ────────────────────────────────────
-
         private void HandleAudioCue(string cueName)
         {
-            // Special: start ambient
             if (cueName == "crowd_ambient_start")
             {
-                PlayAmbient(2); // start at excited/high mood
+                // Siempre arranca en el índice más alto disponible
+                int startIndex = _ambientByMood != null ? _ambientByMood.Length - 1 : 0;
+                PlayAmbient(startIndex);
                 return;
             }
 
             if (_clipMap.TryGetValue(cueName, out AudioClip clip) && clip != null)
-            {
                 _sfxSource.PlayOneShot(clip);
-            }
             else
-            {
                 Debug.LogWarning($"[AudioManager] No clip for cue: '{cueName}'");
-            }
         }
 
         private void HandleMoodChanged(float normalized)
         {
-            // Switch ambient track based on mood level
+            // Si solo hay 1 clip, no cambiar nunca
+            if (_ambientByMood == null || _ambientByMood.Length <= 1) return;
+
             int targetIndex;
-            if      (normalized > 0.6f) targetIndex = 2; // high — excited crowd
-            else if (normalized > 0.3f) targetIndex = 1; // mid — restless
-            else                        targetIndex = 0; // low — tense/angry
+            if (normalized > 0.6f) targetIndex = Mathf.Min(2, _ambientByMood.Length - 1);
+            else if (normalized > 0.3f) targetIndex = Mathf.Min(1, _ambientByMood.Length - 1);
+            else targetIndex = 0;
 
             if (targetIndex != _currentAmbientIndex)
                 PlayAmbient(targetIndex);
         }
 
-        // ── Private helpers ───────────────────────────────────
-
         private void PlayAmbient(int index)
         {
-            if (_ambientByMood == null || index >= _ambientByMood.Length) return;
+            if (_ambientByMood == null || _ambientByMood.Length == 0) return;
+
+            // Clampear al rango disponible — funciona con 1, 2 o 3 clips
+            index = Mathf.Clamp(index, 0, _ambientByMood.Length - 1);
+
             if (_ambientByMood[index] == null) return;
             if (index == _currentAmbientIndex) return;
 
-            _currentAmbientIndex       = index;
-            _ambientSource.clip        = _ambientByMood[index];
-            _ambientSource.loop        = true;
-            _ambientSource.volume      = 0f;
-            _targetAmbientVolume       = _ambientVolume;
+            _currentAmbientIndex = index;
+            _ambientSource.clip = _ambientByMood[index];
+            _ambientSource.loop = true;
+            _ambientSource.volume = 0f;
+            _targetAmbientVolume = _ambientVolume;
             _ambientSource.Play();
         }
 
@@ -134,8 +127,9 @@ namespace Booth.Audio
                 { "crowd_groan",             _crowdGroanClip    },
                 { "crowd_cheer",             _crowdCheerClip    },
                 { "crowd_riot",              _crowdRiotClip     },
-                { "crowd_distant",           null               }, // ambient — handled separately
+                { "crowd_distant",           null               },
             };
         }
     }
 }
+

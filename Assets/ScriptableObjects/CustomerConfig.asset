@@ -44,10 +44,6 @@ MonoBehaviour:
   CustomerSpriteKeys:
   - customer_adult_a
   - customer_adult_b
-  - customer_adult_c
-  - customer_adult_d
   - customer_minor_a
-  - customer_minor_b
   MinorSpriteKeys:
   - customer_minor_a
-  - customer_minor_b
